@@ -14,13 +14,13 @@ class AppointmentStatus(str, Enum):
 
 class Appointment(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    display_id: Optional[int] = Field(sa_column=Column(Integer, autoincrement=True, unique=True, index=True, nullable=True),default=None)    
+    display_id: int = Field(sa_column=Column(Integer, autoincrement=True, nullable=False, unique=True, index=True))    
+    # display_id: Optional[int] = Field(sa_column=Column(Integer, autoincrement=True, unique=True, index=True, nullable=True),default=None)    
 
     appointment_date: date
     appointment_time: time
     status: AppointmentStatus = Field(default=AppointmentStatus.SCHEDULED)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     # Foreign Keys 
     patient_id: UUID = Field(foreign_key="patient.id")
     doctor_id: UUID = Field(foreign_key="user.id")

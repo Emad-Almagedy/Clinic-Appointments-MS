@@ -13,7 +13,8 @@ class UserRole(str, Enum):
     
 class User(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid.uuid4, primary_key=True, index=True, nullable=False)
-    display_id: Optional[int] = Field(sa_column=Column(Integer, autoincrement=True, unique=True, index=True, nullable=True),default=None)    
+    # display_id: Optional[int] = Field(sa_column=Column(Integer, autoincrement=True, unique=True, index=True, nullable=True),default=None) 
+    display_id: int = Field(sa_column=Column(Integer, autoincrement=True, nullable=False, unique=True, index=True))    
     full_name: str = Field(index=True) 
     email: str = Field(unique=True, index=True) 
     phone_number: str

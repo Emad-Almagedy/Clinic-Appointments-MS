@@ -6,8 +6,10 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
+from typing import Annotated
 import uuid
 
+from app.models import User
 from app.core.config import settings
 
 from app.models import User, UserRole
@@ -26,6 +28,9 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     """Create a JWT access token."""
+    
+    if "sub" not in data:
+        raise ValueError("Token must include 'sub' (user_id)")
     # takes copy of the user data
     to_encode = data.copy()
     
@@ -39,7 +44,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
         )
     
     # adds expiration timestamp    
-    to_encode.update({"exp": expire})
+    to_encode.update({"exp": int(expire.timestamp())})
     
     # creates the JWT token
     encoded_jwt = jwt.encode(
@@ -61,12 +66,16 @@ def verify_access_token(token: str) -> str | None:
             options={"require": ["exp", "sub"]},
         )
     # if invalide return none    
+    except jwt.ExpiredSignatureError:
+        return None
     except jwt.InvalidTokenError:
         return None
     # else extract the sub ( user ID or data)
     else:
         return payload.get("sub")
 
+
+# --- fetch the current user ---
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: AsyncSession = Depends(get_db),
@@ -84,7 +93,9 @@ async def get_current_user(
     except ValueError:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid token format")
 
-    user = await db.get(User, user_uuid)
+    # user = await db.get(User, user_uuid)
+    result = await db.execute(select(User).where(User.id == user_uuid))
+    user = result.scalars().first()
 
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")

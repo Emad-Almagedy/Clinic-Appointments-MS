@@ -7,7 +7,8 @@ from sqlalchemy import Column, Integer
 
 class Patient(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    display_id: Optional[int] = Field(sa_column=Column(Integer, autoincrement=True, unique=True, index=True, nullable=True),default=None)    
+    display_id: int = Field(sa_column=Column(Integer, autoincrement=True, nullable=False, unique=True, index=True))    
+    # display_id: Optional[int] = Field(sa_column=Column(Integer, autoincrement=True, unique=True, index=True, nullable=True),default=None)    
     full_name: str = Field(index=True)
     national_id: str = Field(unique=True, index=True)
     email: str

@@ -47,6 +47,27 @@
                     await session.close()
         """
         * ensures rollbacks on errors and cleaner close
+
+4. db queries:
+    1.  """
+        select(func.count(Appointment.id))
+        .where(Appointment.doctor_id == current_doctor.id)
+        .where(Appointment.appointment_date == today)
+        """
+      * count how many appointments for this doctor AND scheduled today same as `(SELECT COUNT(id) FROM appointment WHERE doctor_id = ? AND appointment_date = '2026-04-19';)`
+
+    2. """
+        select(Appointment).options(joinedload(Appointment.patient))
+        .where(Appointment.doctor_id == current_doctor.id)
+        .where(Appointment.appointment_date == today)
+        .order_by(Appointment.appointment_time.asc())
+        """  
+        * joinedload allows to load a related table in the same query
+        * if we used select(Appointment) without joinedload then it will load the appointments first and then for each appointment make query to fetch the patient
+        * using the joinload it uses a LEFT JOIN 
+        `(SELECT *FROM appointment LEFT JOIN patient ON appointment.patient_id = patient.id)`
+        * therefore makes it easy to fetch from a related table make using a relationship without extra wuery usage by the system.
+
     
 
 
