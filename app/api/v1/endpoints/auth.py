@@ -52,44 +52,6 @@ async def login_for_access_token(
 
     return Token(access_token=token, token_type="bearer")
 
-
-
-# --- Create a user ---
-@router.post("/users", response_model=UserPrivate, status_code=status.HTTP_201_CREATED)
-async def create_user(
-    user: UserCreate,
-    db: Annotated[AsyncSession, Depends(get_db)],
-    _: Annotated[User, Depends(admin_only)],
-):
-    # check if email exists 
-    email = user.email.lower()
-    result = await db.execute(select(User).where(User.email == email))
-    existing_user = result.scalars().first()
-    if existing_user:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already Registered")
-    
-    result = await db.execute(select(func.max(User.display_id)))
-    max_display_id = result.scalar() or 0
-    
-    new_user = models.User(
-        display_id=max_display_id + 1,
-        full_name=user.full_name,
-        email=email,
-        phone_number=user.phone_number,
-        role=user.role,
-        speciality=user.speciality if user.role == UserRole.DOCTOR else None,
-        hashed_password=hash_password(user.password),
-        is_active=user.is_active,
-    )
-    try:
-        db.add(new_user)
-        await db.commit()
-        await db.refresh(new_user)
-    except Exception:
-        await db.rollback()
-        raise
-            
-    return new_user    
         
 # --- get the current user ---
 @router.get("/me", response_model=UserPrivate)

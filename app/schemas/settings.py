@@ -9,7 +9,7 @@ class SystemSettingBase(BaseModel):
 class SystemSettingCreate(SystemSettingBase):
     pass
 
-class SystemSettingsUpdate(BaseModel):
+class SystemSettingUpdate(BaseModel):
     # we only need to update the value as the system is dependent on the specific name of the system setting
     value: str
 

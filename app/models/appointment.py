@@ -40,3 +40,6 @@ class VisitNote(SQLModel, table=True):
 
     appointment: Appointment = Relationship(back_populates="note")
     doctor: "User" = Relationship(back_populates="authored_notes")
+    
+    
+    

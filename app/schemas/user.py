@@ -10,7 +10,7 @@ class UserBase(BaseModel):
     phone_number: str = Field(min_length=9)
     role: UserRole
     speciality: Optional[str] = None
-    is_active: bool = True
+    is_active: bool = True 
     
 class UserCreate(UserBase):
     password: str = Field(min_length=8)
@@ -26,6 +26,14 @@ class UserUpdate(BaseModel):
     speciality: Optional[str] = None
     is_active: Optional[bool] = None
     password: Optional[str] = Field(None, min_length=8)
+
+class UserRead(UserBase):
+    id: UUID
+    display_id: int  
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True  
     
 class UserPublic(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -40,6 +48,13 @@ class UserPrivate(UserPublic):
     phone_number: str
     is_active:bool 
     speciality: Optional[str]
+    
+# --- Admin dashboard stats schema ---
+class AdminDashboardStats(BaseModel) :
+    total_users: int
+    total_doctors: int
+    total_patients: int
+    total_appointments: int   
     
             
         

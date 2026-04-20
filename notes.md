@@ -67,6 +67,53 @@
         * using the joinload it uses a LEFT JOIN 
         `(SELECT *FROM appointment LEFT JOIN patient ON appointment.patient_id = patient.id)`
         * therefore makes it easy to fetch from a related table make using a relationship without extra wuery usage by the system.
+        * """
+        result = await db.execute(
+        select(Appointment)
+        .options(
+            joinedload(Appointment.patient),
+            joinedload(Appointment.doctor),
+            joinedload(Appointment.note) 
+            )
+        .order_by(Appointment.created_at.desc())
+        .limit(limit)
+        )
+        """
+        * Pydantic is trying to serialize the note filed in the appointment schema, but if not eagerly loaded from the database, sqlalchemy crashes when it tries to lazy load in async environment, therfore we all the `joinedload(Appointment.note)` to the query, so the appointment, patient, doctor and the note detials is feetched in a single database hit. 
+
+5. """
+    if user_in.full_name is not None:
+        user.full_name = user_in.full_name [cite: 235]
+    
+    if user_in.email is not None:
+        user.email = user_in.email [cite: 235]
+        
+    if user_in.phone_number is not None:
+        user.phone_number = user_in.phone_number [cite: 235]
+        
+    if user_in.role is not None:
+        user.role = user_in.role [cite: 54, 292]
+        
+    if user_in.speciality is not None:
+        user.speciality = user_in.speciality [cite: 235]
+        
+    if user_in.is_active is not None:
+        user.is_active = user_in.is_active
+    """
+    * this can be replaced by this 
+    """
+    update_data = user_in.model_dump(exclude_unset=True)
+    
+    for field, value in update_data.items():
+        setattr(user, field, value)
+
+    """
+
+6. `await db.delete(user) await db.commit() return None` hard deleteting a user , the database will block the deleteion to prevent orphaned records, if it doesnt not block then when trying to fetch a data related to that user, we will endup with crashing dashboard as it tries to display data that dont exist,
+    * running `db.delete` will truigger a foreig key error or cause crashes in the system
+    * solution is using a soft delete where we just deactivate that user 
+ 
+    
 
     
 

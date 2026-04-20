@@ -1,0 +1,13 @@
+{
+    "clinic_name": "City Medical Clinic",
+    "clinic_address": "123 Healthcare Ave, Medical District",
+    "clinic_phone": "+1-555-CLINIC",
+    "clinic_email": "info@citymedicalclinic.com",
+    "appointment_duration": "30",
+    "working_hours_start": "08:00",
+    "working_hours_end": "18:00",
+    "max_appointments_per_day": "20",
+    "timezone": "America/New_York",
+    "enable_email_notifications": "true",
+    "enable_sms_notifications": "false"
+}

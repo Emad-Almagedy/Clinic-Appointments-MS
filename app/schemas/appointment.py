@@ -47,10 +47,15 @@ class AppointmentRead(AppointmentBase):
         from_attributes = True
             
 
-# --- Doctor Dashboard Schemas ---
-
+# --- Dashboard Schemas ---
 class DoctorDashboardStats(BaseModel):
     todays_appointments: int
     upcoming_appointments: int
     total_patients: int
     visit_notes_total: int
+    
+class AppointmentStatusSummary(BaseModel):
+    scheduled: int
+    in_progress: int
+    completed: int
+    cancelled: int
