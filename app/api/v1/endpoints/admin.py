@@ -1,18 +1,20 @@
 from fastapi import APIRouter, Depends, status, HTTPException
-from sqlalchemy import func
+from sqlalchemy import func, or_, cast, String
 from sqlmodel import select
 from sqlalchemy.orm import joinedload
-from typing import List, Annotated
+from typing import List, Annotated, Optional
 from app.models import User, Appointment, Patient, UserRole, AppointmentStatus
 from app.models import SystemSetting
-from app.schemas.user import AdminDashboardStats, UserPrivate, UserCreate, UserRead, UserUpdate
-from app.schemas.appointment import AppointmentRead, AppointmentStatusSummary
+from app.schemas.user import  UserPrivate, UserCreate, UserRead, UserUpdate
+from app.schemas.appointment import AppointmentRead, AppointmentStatusSummary, AdminDashboardStats
 from app.schemas.settings import SystemSettingRead, SystemSettingUpdate, SystemSettingCreate
 from app.core.auth import admin_only
 from app.core.cache_config import SettingsCache
 from app.api.v1.dependencies import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
+from app.models import User, SystemSetting
+from app.core.auth import hash_password
 
 router = APIRouter()
 
@@ -59,7 +61,8 @@ async def get_admin_status_summary(
 async def get_all_appointments(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_admin: Annotated[User, Depends(admin_only)],
-    limit: int = None,
+    search: Optional[str] = None,
+    limit: Optional[int] = None,
 ):
     statement =(
         select(Appointment)
@@ -68,8 +71,19 @@ async def get_all_appointments(
             joinedload(Appointment.doctor),
             joinedload(Appointment.note) 
             )
-        .order_by(Appointment.created_at.desc())
     )
+
+    if search:
+        s = f"%{search}%"
+        statement = statement.where(
+            or_(
+                Appointment.patient.has(Patient.full_name.ilike(s)),
+                Appointment.doctor.has(User.full_name.ilike(s)),
+                cast(Appointment.display_id, String).ilike(s)
+            )
+        )
+
+    statement = statement.order_by(Appointment.created_at.desc())
     
     # if there is a limit apply it else return all appointments
     if limit is not None:
@@ -95,7 +109,7 @@ async def create_user(
     result = await db.execute(select(func.max(User.display_id)))
     max_display_id = result.scalar() or 0
     
-    new_user = models.User(
+    new_user = User(
         display_id=max_display_id + 1,
         full_name=user.full_name,
         email=email,
@@ -120,10 +134,21 @@ async def create_user(
 async def get_all_users(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_admin: Annotated[User, Depends(admin_only)],
+    search: Optional[str] = None,
 ):
-    
-    statement = select(User).order_by(User.display_id.asc())
-    result = await db.execute(statement)
+    query = select(User)
+
+    if search:
+        s = f"%{search}%"
+        query = query.where(
+            or_(
+                User.full_name.ilike(s),
+                User.email.ilike(s),
+                User.phone_number.ilike(s)
+            )
+        )
+
+    result = await db.execute(query.order_by(User.display_id.asc()))
     return result.scalars().all()
 
 # --- Update a user ---
@@ -146,19 +171,19 @@ async def update_user(
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Security: You cannot demote yourself from the Admin role.")
 
     if user_in.full_name is not None:
-        user.full_name = user_in.full_name [cite: 235]
+        user.full_name = user_in.full_name 
     
     if user_in.email is not None:
-        user.email = user_in.email [cite: 235]
+        user.email = user_in.email 
         
     if user_in.phone_number is not None:
-        user.phone_number = user_in.phone_number [cite: 235]
+        user.phone_number = user_in.phone_number 
         
     if user_in.role is not None:
-        user.role = user_in.role [cite: 54, 292]
+        user.role = user_in.role 
         
     if user_in.speciality is not None:
-        user.speciality = user_in.speciality [cite: 235]
+        user.speciality = user_in.speciality 
         
     if user_in.is_active is not None:
         user.is_active = user_in.is_active

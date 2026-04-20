@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import Annotated, List
+from typing import Annotated, List, Optional
 from sqlalchemy import func
 from sqlmodel import select
 from datetime import date
-from app.models import User, Appointment, VisitNote, Patient
+from app.models import User, Appointment, VisitNote, Patient, AppointmentStatus
 from app.core.auth import doctor_only
 from app.schemas.appointment import DoctorDashboardStats, AppointmentRead, VisitNoteRead, VisitNoteBase, VisitNoteCreate
 from app.api.v1.dependencies import get_db
@@ -157,6 +157,39 @@ async def add_visit_note(
     await db.commit()
     await db.refresh(new_note)
     return new_note
+
+# --- fetch all doctor appointments with search and status filter ---
+@router.get("/appointments", response_model=List[AppointmentRead])
+async def get_doctor_appointments(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_doctor: Annotated[User, Depends(doctor_only)],
+    search: Optional[str] = None,
+    status_filter: Optional[str] = None,
+):
+    query = (
+        select(Appointment)
+        .options(
+            joinedload(Appointment.patient),
+            joinedload(Appointment.doctor),
+            joinedload(Appointment.note),
+        )
+        .where(Appointment.doctor_id == current_doctor.id)
+    )
+
+    if search:
+        s = f"%{search}%"
+        query = query.where(Appointment.patient.has(Patient.full_name.ilike(s)))
+
+    if status_filter:
+        status_enum = next((s for s in AppointmentStatus if s.value.lower() == status_filter.lower()), None)
+        if not status_enum:
+            raise HTTPException(status_code=400, detail="Invalid status filter")
+        query = query.where(Appointment.status == status_enum)
+
+    query = query.order_by(Appointment.appointment_date.desc(), Appointment.appointment_time.asc())
+
+    result = await db.execute(query)
+    return result.scalars().all()
         
     
 

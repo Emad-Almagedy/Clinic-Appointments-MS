@@ -49,12 +49,5 @@ class UserPrivate(UserPublic):
     is_active:bool 
     speciality: Optional[str]
     
-# --- Admin dashboard stats schema ---
-class AdminDashboardStats(BaseModel) :
-    total_users: int
-    total_doctors: int
-    total_patients: int
-    total_appointments: int   
-    
-            
+
         

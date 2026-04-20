@@ -59,3 +59,18 @@ class AppointmentStatusSummary(BaseModel):
     in_progress: int
     completed: int
     cancelled: int
+
+# --- Admin dashboard stats schema ---
+class AdminDashboardStats(BaseModel) :
+    total_users: int
+    total_doctors: int
+    total_patients: int
+    total_appointments: int   
+
+# --- Reception stats schemas ---
+class ReceptionDashboardStats(BaseModel):
+    todays_appointments: int
+    upcoming_7_days: int
+    total_patients: int
+    completed_today: int
+    

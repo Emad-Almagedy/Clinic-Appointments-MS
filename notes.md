@@ -111,7 +111,22 @@
 
 6. `await db.delete(user) await db.commit() return None` hard deleteting a user , the database will block the deleteion to prevent orphaned records, if it doesnt not block then when trying to fetch a data related to that user, we will endup with crashing dashboard as it tries to display data that dont exist,
     * running `db.delete` will truigger a foreig key error or cause crashes in the system
-    * solution is using a soft delete where we just deactivate that user 
+    * solution is using a soft delete where we just deactivate that user
+
+7. """async def get_count(status: AppointmentStatus):
+        res = await db.execute(
+            select(func.count(Appointment.id)).where(
+                and_(Appointment.appointment_date == today, Appointment.status == status)
+            )
+        )
+        return res.scalar() or 0
+
+    return {
+        "scheduled": await get_count(AppointmentStatus.SCHEDULED),
+        "in_progress": await get_count(AppointmentStatus.IN_PROGRESS),
+        "completed": await get_count(AppointmentStatus.COMPLETED)
+    }    """ 
+    * better way for fetching enum data instead of a query for every status (reception.py)
  
     
 
