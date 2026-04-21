@@ -127,10 +127,31 @@
         "completed": await get_count(AppointmentStatus.COMPLETED)
     }    """ 
     * better way for fetching enum data instead of a query for every status (reception.py)
- 
+  
+8. """
+        new_app = Appointment(
+        appointment_date=appointment_in.appointment_date,
+        appointment_time=appointment_in.appointment_time,
+        appointment_end_time=new_end,  # The calculated value
+        patient_id=appointment_in.patient_id,
+        doctor_id=appointment_in.doctor_id,
+        # 'status' defaults to SCHEDULED in the model, 
+        # but you can set it explicitly here:
+        status=AppointmentStatus.SCHEDULED 
+    )
+""" 
+    * we can use the model_dump() method instead of writing all of the entries to the database. and add the data that is calcualted in the route manually directly to tthe object 
+    *"""
+    new_app = Appointment(
+        **appointment_in.model_dump(),
+        appointment_end_time=new_end 
+    )
     
 
-    
+    """ 
 
+9. `from __future__ import annotations` adding this in the models prevents runtime issues for the foreign keys (like patient and doctor in the appointment model) 
+
+10. `= Field (default=AppointmentStatus.SCHEDULED)` removed from the status of the appointment to not make shceduled as default
 
 

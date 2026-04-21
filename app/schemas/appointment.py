@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from uuid import UUID
 from datetime import date, time, datetime
@@ -27,12 +27,14 @@ class VisitNoteRead(VisitNoteBase):
 
 class AppointmentBase(BaseModel):
     appointment_date: date
-    appointment_time: time
-    status: AppointmentStatus = AppointmentStatus.SCHEDULED 
+    appointment_time: time = Field(description="Appointment time in HH:MM:SS format",examples=["05:30:00"])
+    patient_id: UUID
+    doctor_id: UUID   
+    status: AppointmentStatus 
 
 class AppointmentCreate(AppointmentBase):
-    patient_id: UUID
-    doctor_id: UUID       
+    pass
+        
 
 class AppointmentRead(AppointmentBase):
     id: UUID
@@ -46,6 +48,12 @@ class AppointmentRead(AppointmentBase):
     class Config:
         from_attributes = True
             
+class AppointmentUpdate(BaseModel):
+    appointment_date: Optional[date] = None
+    appointment_time: Optional[time] = Field(None, description="Appointment time in HH:MM:SS format",examples=["05:30:00"])
+    doctor_id: Optional[UUID] = None 
+    status: Optional[AppointmentStatus] = None
+                
 
 # --- Dashboard Schemas ---
 class DoctorDashboardStats(BaseModel):

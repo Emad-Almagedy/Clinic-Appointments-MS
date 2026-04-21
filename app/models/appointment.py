@@ -1,7 +1,7 @@
 import uuid
 from uuid import UUID
 from typing import List, Optional
-from datetime import date, time, datetime
+from datetime import date, time, datetime, timezone
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import Column, Integer
 from enum import Enum
@@ -19,7 +19,8 @@ class Appointment(SQLModel, table=True):
 
     appointment_date: date
     appointment_time: time
-    status: AppointmentStatus = Field(default=AppointmentStatus.SCHEDULED)
+    appointment_end_time: time
+    status: AppointmentStatus
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     # Foreign Keys 
     patient_id: UUID = Field(foreign_key="patient.id")
@@ -33,7 +34,7 @@ class Appointment(SQLModel, table=True):
 class VisitNote(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     content: str 
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     appointment_id: UUID = Field(foreign_key="appointment.id", unique=True)
     doctor_id: UUID = Field(foreign_key="user.id")

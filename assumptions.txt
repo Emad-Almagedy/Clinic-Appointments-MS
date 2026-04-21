@@ -1,0 +1,15 @@
+* in the AppointmentUpdate, the doctor_id is concidered as editable the doctor due to emergency or shift change or leave is on leave and the appointment is edited to another doctor of the same speciality.
+* the receptionist should verify selecting another doctor with the same speciality
+
+* no appointments can be sheduled before that specific time ( past date)
+* no two active appointments at the same time for the same doctor
+
+* timezones depending on the clinic timezone
+* if error then it will fall back to UTC
+
+* user is not deleted only soft delete to prevent any crashes and to remain in database
+* already added a display_id for human readable ID
+
+* using joinload to prevent missinggreenlet errors as this is an asynchronous environment
+* the system doesnt prevent from a patient booking two doctors at the same time 
+

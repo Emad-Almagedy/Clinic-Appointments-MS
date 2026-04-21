@@ -3,7 +3,7 @@ from sqlalchemy import func, or_, cast, String
 from sqlmodel import select
 from sqlalchemy.orm import joinedload
 from typing import List, Annotated, Optional
-from app.models import User, Appointment, Patient, UserRole, AppointmentStatus
+from app.models import User, Appointment, Patient, UserRole, AppointmentStatus, SystemSetting
 from app.models import SystemSetting
 from app.schemas.user import  UserPrivate, UserCreate, UserRead, UserUpdate
 from app.schemas.appointment import AppointmentRead, AppointmentStatusSummary, AdminDashboardStats
@@ -13,7 +13,6 @@ from app.core.cache_config import SettingsCache
 from app.api.v1.dependencies import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
-from app.models import User, SystemSetting
 from app.core.auth import hash_password
 
 router = APIRouter()
@@ -37,7 +36,7 @@ async def get_admin_stats(
     }
     
 # --- Appointment Status summary ---
-@router.get("/status-summary", response_model=AppointmentStatusSummary)   
+@router.get("/status_summary", response_model=AppointmentStatusSummary)   
 async def get_admin_status_summary(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_admin: Annotated[User, Depends(admin_only)]
@@ -48,7 +47,7 @@ async def get_admin_status_summary(
     )
     status_counts = dict(result.all())
     
-    return{
+    return {
         "scheduled": status_counts.get(AppointmentStatus.SCHEDULED, 0),
         "in_progress": status_counts.get(AppointmentStatus.IN_PROGRESS, 0),
         "completed": status_counts.get(AppointmentStatus.COMPLETED, 0),

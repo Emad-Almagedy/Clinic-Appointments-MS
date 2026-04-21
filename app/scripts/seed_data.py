@@ -1,11 +1,12 @@
 import asyncio
 from datetime import date, time, datetime
 from sqlmodel import select
+from datetime import timedelta
 
 # Import all models
 from app.models.user import User, UserRole
+from app.models.appointment import Appointment, AppointmentStatus, VisitNote
 from app.models.patient import Patient
-from app.models.appointment import Appointment, VisitNote, AppointmentStatus
 
 from app.core.auth import hash_password
 from app.db.base import create_db_and_tables
@@ -143,8 +144,11 @@ async def seed_complete_data() -> None:
         ]
 
         appointments = {}
+        # We assume a 30-minute duration for seeded data to match your settings
+        seed_duration = 30 
+
         for appt_data in appointments_data:
-            # Check if exists by patient, doctor, date, time
+            # 1. Check if exists
             result = await db.execute(
                 select(Appointment).where(
                     Appointment.patient_id == appt_data["patient_id"],
@@ -154,13 +158,29 @@ async def seed_complete_data() -> None:
                 )
             )
             appt = result.scalars().first()
+            
             if not appt:
-                appt = Appointment(**appt_data)
+                # 2. Calculate the end time (This is the critical update!)
+                start_dt = datetime.combine(appt_data["appointment_date"], appt_data["appointment_time"])
+                end_time = (start_dt + timedelta(minutes=seed_duration)).time()
+
+                # 3. Create with the mandatory appointment_end_time field
+                appt = Appointment(
+                    appointment_date=appt_data["appointment_date"],
+                    appointment_time=appt_data["appointment_time"],
+                    appointment_end_time=end_time,
+                    status=appt_data["status"],
+                    patient_id=appt_data["patient_id"],
+                    doctor_id=appt_data["doctor_id"],
+                    display_id=appt_data["display_id"]
+                )
+                
                 db.add(appt)
                 await db.commit()
                 await db.refresh(appt)
+            
             appointments[f"{appt_data['patient_id']}_{appt_data['appointment_date']}"] = appt
-
+        
         # Seed Visit Notes
         notes_data = [
             {

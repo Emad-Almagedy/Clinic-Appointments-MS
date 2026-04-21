@@ -59,14 +59,18 @@ async def get_doctor_status(
     
     
 # --- Fetch Today's appointments (for the current doctor) ---
-@router.get("/appointments/today", response_model=List[AppointmentRead])
+@router.get("/appointments_today", response_model=List[AppointmentRead])
 async def get_todays_appointments(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_doctor: Annotated[User, Depends(doctor_only)]
 ):
     today = date.today()
     result = await db.execute(
-        select(Appointment).options(joinedload(Appointment.patient))
+        select(Appointment).options(
+            joinedload(Appointment.patient),
+            joinedload(Appointment.doctor),
+            joinedload(Appointment.note)
+        )
         .where(Appointment.doctor_id == current_doctor.id)
         .where(Appointment.appointment_date == today)
         .order_by(Appointment.appointment_time.asc())
@@ -74,7 +78,7 @@ async def get_todays_appointments(
     return result.scalars().all()
 
 # --- Fetch the upcoming appointments( for the current doctor) ---
-@router.get("/appointments/upcoming", response_model=List[AppointmentRead])
+@router.get("/appointments_upcoming", response_model=List[AppointmentRead])
 async def get_upcoming_appointments(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_doctor: Annotated[User, Depends(doctor_only)]
@@ -112,8 +116,8 @@ async def get_appointment_details(
     appointment = result.scalars().first()
     
     # if there is not appointment with the current id
-    if not Appointment:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=" Appointment not found ")
+    if not appointment:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Appointment not found")
     
     return appointment
 
@@ -133,7 +137,7 @@ async def add_visit_note(
     appointment = result.scalars().first()
     
     if not appointment:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=" Appointment not found ")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Appointment not found")
     
     # check if note exists
     result = await db.execute(select(VisitNote).where(VisitNote.appointment_id == id))
@@ -183,7 +187,7 @@ async def get_doctor_appointments(
     if status_filter:
         status_enum = next((s for s in AppointmentStatus if s.value.lower() == status_filter.lower()), None)
         if not status_enum:
-            raise HTTPException(status_code=400, detail="Invalid status filter")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid status filter")
         query = query.where(Appointment.status == status_enum)
 
     query = query.order_by(Appointment.appointment_date.desc(), Appointment.appointment_time.asc())
