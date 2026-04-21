@@ -79,7 +79,7 @@ async def get_status_overview(
     
 
 # --- fetch the appointments ( all or for the day) ---
-@router.get("/appointments_today", response_model=List[AppointmentRead])
+@router.get("/appointments", response_model=List[AppointmentRead])
 async def get_today_appointments(
     db: Annotated[AsyncSession, Depends(get_db)],
     current_user: Annotated[User, Depends(get_current_user)],

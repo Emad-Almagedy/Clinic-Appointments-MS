@@ -5,7 +5,7 @@ from sqlmodel import select
 from datetime import date
 from app.models import User, Appointment, VisitNote, Patient, AppointmentStatus
 from app.core.auth import doctor_only
-from app.schemas.appointment import DoctorDashboardStats, AppointmentRead, VisitNoteRead, VisitNoteBase, VisitNoteCreate
+from app.schemas.appointment import DoctorDashboardStats, AppointmentRead, VisitNoteRead, VisitNoteBase, VisitNoteCreate, AppointmentStatusUpdate
 from app.api.v1.dependencies import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
@@ -162,6 +162,45 @@ async def add_visit_note(
     await db.refresh(new_note)
     return new_note
 
+# update the patient status
+@router.patch("/appointments/{id}/status", response_model=AppointmentRead)
+async def update_appointment_status(
+    id: UUID,
+    status_in: AppointmentStatusUpdate,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[User, Depends(doctor_only)] # Ensure only doctors call this
+):
+    result = await db.execute(select(Appointment).where(Appointment.id == id))
+    appointment = result.scalars().first()
+    
+    if not appointment:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Appointment not found")
+
+    # a check to make sure only the appointment doctor updates the status
+    if appointment.doctor_id != current_user.id:
+        raise HTTPException(
+            status_code=403, 
+            detail="You are not authorized to update this appointment."
+        )
+
+    appointment.status = status_in.status
+    
+    await db.commit()
+
+    statement = (
+        select(Appointment)
+        .where(Appointment.id == id)
+        .options(
+            joinedload(Appointment.patient),
+            joinedload(Appointment.doctor),
+            joinedload(Appointment.note)
+        )
+    )
+    
+    fetched_appointment = await db.execute(statement)
+    result = fetched_appointment.scalars().first()
+    return result
+
 # --- fetch all doctor appointments with search and status filter ---
 @router.get("/appointments", response_model=List[AppointmentRead])
 async def get_doctor_appointments(
@@ -194,6 +233,7 @@ async def get_doctor_appointments(
 
     result = await db.execute(query)
     return result.scalars().all()
+        
         
     
 

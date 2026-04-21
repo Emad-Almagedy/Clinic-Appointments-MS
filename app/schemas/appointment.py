@@ -82,3 +82,5 @@ class ReceptionDashboardStats(BaseModel):
     total_patients: int
     completed_today: int
     
+class AppointmentStatusUpdate(BaseModel):
+    status: AppointmentStatus    
