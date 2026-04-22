@@ -108,13 +108,13 @@ async def get_current_user(
 # --- Role Based Access Control ---
 class RoleChecker:
     def __init__(self, allowed_roles: list[UserRole]):
-        # roles allowed for sepcific endpoint
+        # roles allowed for specific endpoint
         self.allowed_roles = allowed_roles
         
     def __call__(self, current_user:User = Depends(get_current_user)): 
         # runs everytime someone tries to open an endpoint
         if current_user.role not in self.allowed_roles:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You do not have permisson to perform this action")
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You do not have permission to perform this action")
         return current_user     
         
 admin_only = RoleChecker([UserRole.ADMIN])

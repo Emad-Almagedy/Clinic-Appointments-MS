@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from typing import Optional
 from uuid import UUID
 from datetime import date, datetime
@@ -14,11 +14,12 @@ class PatientCreate(PatientBase):
     pass
 
 class PatientRead(PatientBase):
+    model_config = ConfigDict(from_attributes=True)
     id: UUID
     display_id: int
     created_at: datetime
     
-    class Config:
-        from_attributes = True
+    # class Config:
+    #     from_attributes = True
     
     

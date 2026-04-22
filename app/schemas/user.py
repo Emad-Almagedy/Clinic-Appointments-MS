@@ -28,12 +28,13 @@ class UserUpdate(BaseModel):
     password: Optional[str] = Field(None, min_length=8)
 
 class UserRead(UserBase):
+    model_config = ConfigDict(from_attributes=True)
     id: UUID
     display_id: int  
     created_at: datetime
     
-    class Config:
-        from_attributes = True  
+    # class Config:
+    #     from_attributes = True  
     
 class UserPublic(BaseModel):
     model_config = ConfigDict(from_attributes=True)

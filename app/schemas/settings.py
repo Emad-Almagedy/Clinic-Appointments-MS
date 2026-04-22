@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
 
 class SystemSettingBase(BaseModel):
@@ -14,12 +14,12 @@ class SystemSettingUpdate(BaseModel):
     value: str
 
 class SystemSettingRead(SystemSettingBase):
+    model_config = ConfigDict(from_attributes=True)
     id: int    
     key: str
     value: str
     
-    class Config:
-        from_attributes = True
+
 
 class SystemSettingsGrouped(BaseModel):
     clinic_information: List[SystemSettingRead] 

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 from uuid import UUID
 from datetime import date, time, datetime
@@ -14,12 +14,13 @@ class VisitNoteCreate(VisitNoteBase):
     pass
     
 class VisitNoteRead(VisitNoteBase):
+    model_config = ConfigDict(from_attributes=True)
     id: UUID
     doctor_id: UUID
     timestamp: datetime
     
-    class Config:
-        from_attributes = True
+    # class Config:
+    #     from_attributes = True
 
 
     
