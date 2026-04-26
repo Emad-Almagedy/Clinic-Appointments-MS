@@ -120,4 +120,4 @@ class RoleChecker:
 admin_only = RoleChecker([UserRole.ADMIN])
 doctor_only = RoleChecker([UserRole.DOCTOR])
 receptionist_only = RoleChecker([UserRole.RECEPTIONIST])
-staff_only = RoleChecker([UserRole.ADMIN, UserRole.RECEPTIONIST])    
+all_staff = RoleChecker([UserRole.ADMIN, UserRole.RECEPTIONIST, UserRole.DOCTOR])    

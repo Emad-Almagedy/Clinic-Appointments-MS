@@ -8,7 +8,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select, func
 
-from app.core.auth import create_access_token, verify_access_token, hash_password, oauth2_scheme, verify_password, admin_only, get_current_user
+from app.core.auth import create_access_token, verify_access_token, hash_password, oauth2_scheme, verify_password, get_current_user
 from app.api.v1.dependencies import get_db
 from app.core.config import settings
 from app.schemas.auth import Token

@@ -13,6 +13,13 @@ class PatientBase(BaseModel):
 class PatientCreate(PatientBase):
     pass
 
+class PatientUpdate(BaseModel):
+    full_name: Optional[str] = Field(None, min_length=1, max_length=50)
+    national_id: Optional[str] = Field(None, min_length=1, max_length=50)
+    email: Optional[EmailStr] = None
+    phone_number: Optional[str] = Field(None, min_length=9)
+    date_of_birth: Optional[date] = None
+
 class PatientRead(PatientBase):
     model_config = ConfigDict(from_attributes=True)
     id: UUID
