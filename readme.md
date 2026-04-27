@@ -89,11 +89,35 @@ curl -X POST http://localhost:8000/api/v1/appointments \
 git clone <your-repo>
 cd project
 
-pip install -r requirements.txt
+# Install dependencies (using uv)
+uv sync
+# or pip install -r requirements.txt
 
-uvicorn app.main:app --reload
-or
+# Set up the database tables using Alembic
+uv run alembic upgrade head
+
+# Seed the database with initial settings and admin user
+uv run python -m app.scripts.seed_settings
+uv run python -m app.scripts.seed_admin
+
+# Run the server
 uv run fastapi dev main.py
+```
+
+---
+
+## 🗄️ Database Migrations (Alembic)
+
+This project uses Alembic to manage database schema changes.
+
+**To create a new migration** (after changing a SQLModel class):
+```bash
+uv run alembic revision --autogenerate -m "description of changes"
+```
+
+**To apply migrations to the database**:
+```bash
+uv run alembic upgrade head
 ```
 
 ---
