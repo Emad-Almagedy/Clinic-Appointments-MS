@@ -73,6 +73,7 @@ async def get_all_users(
     return result.scalars().all()
 
 # Fetch all the doctors ( RECEPTIONIST ONLY )
+# 
 @router.get("/doctors", response_model=List[UserRead])
 async def get_doctors(
     db: Annotated[AsyncSession, Depends(get_db)],

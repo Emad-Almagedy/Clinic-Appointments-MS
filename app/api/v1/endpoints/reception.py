@@ -14,7 +14,6 @@ from app.core.auth import receptionist_only
 from typing import Annotated, List, Optional
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from uuid import UUID
-from zoneinfo import ZoneInfo
 
 
 router = APIRouter()
