@@ -13,7 +13,7 @@ from app.db.base import create_db_and_tables
 from app.api.dependencies import AsyncSessionMaker
 
 async def seed_complete_data() -> None:
-    await create_db_and_tables()
+    # Alembic manages the tables now so no need of the create_db_and_tables()
 
     async with AsyncSessionMaker() as db:
         # Seed Users
@@ -202,4 +202,7 @@ async def seed_complete_data() -> None:
         print("✅ Complete data seeded successfully")
 
 if __name__ == "__main__":
+    import sys
+    if sys.platform == "win32":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     asyncio.run(seed_complete_data())

@@ -26,8 +26,8 @@ SETTINGS_TO_SEED = [
 
 
 async def seed_system_settings() -> None:
-    await create_db_and_tables()
-
+    # Alembic manages the tables now so no need of the create_db_and_tables()
+    
     async with AsyncSessionMaker() as db:
         created = 0
         updated = 0
@@ -56,4 +56,7 @@ async def seed_system_settings() -> None:
 
 
 if __name__ == "__main__":
+    import sys
+    if sys.platform == "win32":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     asyncio.run(seed_system_settings())
