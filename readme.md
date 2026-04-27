@@ -16,7 +16,63 @@ This API powers a role-based clinic system supporting:
 
 ---
 
-## 📡 API Endpoints
+## 📡 API Architecture Versions
+
+*   **`v1` (Role-Based)**: Endpoints are logically grouped by user roles (`/admin`, `/doctor`, `/reception`). Tailored for specific dashboard interfaces where each role has distinct endpoints.
+*   **`v2` (Resource-Based REST)**: Unified, standard RESTful architecture where endpoints are grouped by system resources (`/appointments`, `/users`, `/patients`). Uses role-based permissions internally and accepts query parameters for advanced filtering.
+
+---
+
+## 🟢 API v2 Endpoints (Resource-Based REST)
+
+### 🔐 Authentication
+| Method | Endpoint             | Description           |
+| :----- | :------------------- | :-------------------- |
+| `POST` | `/api/v2/auth/token` | Login and receive JWT |
+| `GET`  | `/api/v2/auth/me`    | Get current user      |
+
+### 👥 Users
+| Method   | Endpoint                   | Description         |
+| :------- | :------------------------- | :------------------ |
+| `GET`    | `/api/v2/users`            | List all users      |
+| `POST`   | `/api/v2/users`            | Create a new user   |
+| `GET`    | `/api/v2/users/doctors`    | List doctors        |
+| `GET`    | `/api/v2/users/{id}`       | Get user details    |
+| `PATCH`  | `/api/v2/users/{id}`       | Update user details |
+| `DELETE` | `/api/v2/users/{id}`       | Deactivate user     |
+
+### 🤒 Patients
+| Method  | Endpoint                  | Description            |
+| :------ | :------------------------ | :--------------------- |
+| `GET`   | `/api/v2/patients`        | List all patients      |
+| `POST`  | `/api/v2/patients`        | Register a new patient |
+| `GET`   | `/api/v2/patients/{id}`   | Get patient details    |
+| `PATCH` | `/api/v2/patients/{id}`   | Update patient details |
+
+### 📅 Appointments
+| Method  | Endpoint                      | Description                                    |
+| :------ | :---------------------------- | :--------------------------------------------- |
+| `GET`   | `/api/v2/appointments`        | List appointments (supports role-based filters)|
+| `POST`  | `/api/v2/appointments`        | Book a new appointment                         |
+| `GET`   | `/api/v2/appointments/{id}`   | Get appointment details                        |
+| `PATCH` | `/api/v2/appointments/{id}`   | Update appointment (status, visit notes, etc.) |
+
+### ⚙️ Settings
+| Method   | Endpoint                      | Description                 |
+| :------- | :---------------------------- | :-------------------------- |
+| `GET`    | `/api/v2/settings`            | Get all system settings     |
+| `POST`   | `/api/v2/settings`            | Create a new setting        |
+| `PATCH`  | `/api/v2/settings/{id}`       | Update a setting            |
+| `DELETE` | `/api/v2/settings/{id}`       | Delete a setting            |
+
+### 📊 Dashboard Stats
+| Method | Endpoint        | Description                         |
+| :----- | :-------------- | :---------------------------------- |
+| `GET`  | `/api/v2/stats` | Get statistics (filtered by role)   |
+
+---
+
+## 🔵 API v1 Endpoints (Role-Based)
 
 ### 🔐 Authentication
 
