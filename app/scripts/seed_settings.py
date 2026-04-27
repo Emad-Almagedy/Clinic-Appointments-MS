@@ -3,7 +3,7 @@ from sqlmodel import select
 
 from app.models.settings import SystemSetting
 from app.db.base import create_db_and_tables
-from app.api.v1.dependencies import AsyncSessionMaker
+from app.api.dependencies import AsyncSessionMaker
 
 SETTINGS_TO_SEED = [
     # Clinic Information

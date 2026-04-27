@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import Patient, User
 from app.schemas.patient import PatientCreate, PatientRead, PatientUpdate
 from app.core.auth import receptionist_only
-from app.api.v1.dependencies import get_db
+from app.api.dependencies import get_db
 
 router = APIRouter()
 
@@ -136,25 +136,25 @@ async def update_patient(
     return patient
 
 
-# --- Deactivate patient (SOFT DELETE) (RECEPTIONIST ONLY) ---
-@router.delete("/{patient_id}", status_code=status.HTTP_200_OK)
-async def deactivate_patient(
-    patient_id: UUID,
-    db: Annotated[AsyncSession, Depends(get_db)],
-    _: Annotated[User, Depends(receptionist_only)],
-):
-    result = await db.execute(select(Patient).where(Patient.id == patient_id))
-    patient = result.scalars().first()
+# # --- Deactivate patient (SOFT DELETE) (RECEPTIONIST ONLY) ---
+# @router.delete("/{patient_id}", status_code=status.HTTP_200_OK)
+# async def deactivate_patient(
+#     patient_id: UUID,
+#     db: Annotated[AsyncSession, Depends(get_db)],
+#     _: Annotated[User, Depends(receptionist_only)],
+# ):
+#     result = await db.execute(select(Patient).where(Patient.id == patient_id))
+#     patient = result.scalars().first()
 
-    if not patient:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found")
+#     if not patient:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found")
 
-    # Check if patient has any active appointments
-    # For now, we'll just deactivate them (soft delete pattern)
-    patient.is_active = False
+#     # Check if patient has any active appointments
+#     # For now, we'll just deactivate them (soft delete pattern)
+#     patient.is_active = False
     
-    db.add(patient)
-    await db.commit()
-    await db.refresh(patient)
+#     db.add(patient)
+#     await db.commit()
+#     await db.refresh(patient)
     
-    return {"message": f"Patient {patient.full_name} has been deactivated"}
+#     return {"message": f"Patient {patient.full_name} has been deactivated"}

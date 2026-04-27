@@ -10,7 +10,7 @@ from app.schemas.appointment import AppointmentRead, AppointmentStatusSummary, A
 from app.schemas.settings import SystemSettingRead, SystemSettingUpdate, SystemSettingCreate
 from app.core.auth import admin_only
 from app.core.cache_config import SettingsCache
-from app.api.v1.dependencies import get_db
+from app.api.dependencies import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 from app.core.auth import hash_password

@@ -4,7 +4,7 @@ from sqlalchemy import select, func, and_, or_, String, cast
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 from app.models import User, Appointment, Patient, AppointmentStatus, UserRole
-from app.api.v1.dependencies import get_db
+from app.api.dependencies import get_db
 from app.core.auth import get_current_user
 from app.core.cache_config import SettingsCache
 from app.schemas.user import UserRead

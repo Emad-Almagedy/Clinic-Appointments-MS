@@ -9,7 +9,7 @@ from app.models.settings import SystemSetting
 
 from app.core.auth import hash_password
 from app.db.base import create_db_and_tables
-from app.api.v1.dependencies import AsyncSessionMaker
+from app.api.dependencies import AsyncSessionMaker
 
 async def create_admin() -> None:
     # This creates the tables if they don't exist

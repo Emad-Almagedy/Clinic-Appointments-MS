@@ -7,7 +7,7 @@ from app.models import User, SystemSetting
 from app.schemas.settings import SystemSettingRead, SystemSettingUpdate, SystemSettingCreate
 from app.core.auth import admin_only
 from app.core.cache_config import SettingsCache
-from app.api.v1.dependencies import get_db
+from app.api.dependencies import get_db
 
 router = APIRouter()
 

@@ -10,7 +10,7 @@ from app.models.patient import Patient
 
 from app.core.auth import hash_password
 from app.db.base import create_db_and_tables
-from app.api.v1.dependencies import AsyncSessionMaker
+from app.api.dependencies import AsyncSessionMaker
 
 async def seed_complete_data() -> None:
     await create_db_and_tables()

@@ -6,7 +6,7 @@ from datetime import date
 from app.models import User, Appointment, VisitNote, Patient, AppointmentStatus
 from app.core.auth import doctor_only
 from app.schemas.appointment import DoctorDashboardStats, AppointmentRead, VisitNoteRead, VisitNoteBase, VisitNoteCreate, AppointmentStatusUpdate
-from app.api.v1.dependencies import get_db
+from app.api.dependencies import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 from uuid import UUID

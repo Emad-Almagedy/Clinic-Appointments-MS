@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, status, HTTPException
-from sqlalchemy import func, or_
+from sqlalchemy import func, or_, and_
 from sqlmodel import select
 from typing import List, Annotated, Optional
 from uuid import UUID
 
 from app.models import User, UserRole
 from app.schemas.user import UserPrivate, UserCreate, UserRead, UserUpdate
-from app.core.auth import admin_only, hash_password
-from app.api.v1.dependencies import get_db
+from app.core.auth import admin_only, receptionist_only,  hash_password
+from app.api.dependencies import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter()
@@ -71,6 +71,16 @@ async def get_all_users(
 
     result = await db.execute(query.order_by(User.display_id.asc()))
     return result.scalars().all()
+
+# Fetch all the doctors ( RECEPTIONIST ONLY )
+@router.get("/doctors", response_model=List[UserRead])
+async def get_doctors(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[User, Depends(receptionist_only)],
+):
+    doctors = await db.execute(select(User).where(and_(User.role == UserRole.DOCTOR, User.is_active == True)))
+    result = doctors.scalars().all()
+    return result
 
 
 # --- Get specific user by ID (ADMIN ONLY) ---
@@ -163,3 +173,5 @@ async def deactivate_user(
     await db.refresh(user)
     
     return {"message": f"User {user.full_name} has been deactivated"}
+
+
