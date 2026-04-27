@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from app.models import User, UserRole, Appointment, Patient, VisitNote, AppointmentStatus
 from app.core.auth import get_current_user
 from app.api.dependencies import get_db
-from app.schemas.appointment import AdminDashboardStats, DoctorDashboardStats, ReceptionDashboardStats
+from app.schemas.appointment import AdminDashboardStats, DoctorDashboardStats, ReceptionDashboardStats, AppointmentStatusSummary
 
 router = APIRouter()
 
@@ -25,11 +25,22 @@ async def get_dashboard_stats(
         total_patients = (await db.execute(select(func.count(Patient.id)))).scalar() or 0
         total_appointments = (await db.execute(select(func.count(Appointment.id)))).scalar() or 0
         
+        scheduled = (await db.execute(select(func.count(Appointment.id)).where(Appointment.status == AppointmentStatus.SCHEDULED))).scalar() or 0
+        in_progress = (await db.execute(select(func.count(Appointment.id)).where(Appointment.status == AppointmentStatus.IN_PROGRESS))).scalar() or 0
+        completed = (await db.execute(select(func.count(Appointment.id)).where(Appointment.status == AppointmentStatus.COMPLETED))).scalar() or 0
+        cancelled = (await db.execute(select(func.count(Appointment.id)).where(Appointment.status == AppointmentStatus.CANCELLED))).scalar() or 0
+
         return AdminDashboardStats(
             total_users=total_users,
             total_doctors=total_doctors,
             total_patients=total_patients,
-            total_appointments=total_appointments
+            total_appointments=total_appointments,
+            status_summary=AppointmentStatusSummary(
+                scheduled=scheduled,
+                in_progress=in_progress,
+                completed=completed,
+                cancelled=cancelled
+            )
         )
         
     elif current_user.role == UserRole.DOCTOR:
@@ -71,14 +82,32 @@ async def get_dashboard_stats(
         
         total_patients = (await db.execute(select(func.count(Patient.id)))).scalar() or 0
         
+        scheduled_today = (await db.execute(select(func.count(Appointment.id)).where(
+            Appointment.appointment_date == today,
+            Appointment.status == AppointmentStatus.SCHEDULED
+        ))).scalar() or 0
+        in_progress_today = (await db.execute(select(func.count(Appointment.id)).where(
+            Appointment.appointment_date == today,
+            Appointment.status == AppointmentStatus.IN_PROGRESS
+        ))).scalar() or 0
         completed_today = (await db.execute(select(func.count(Appointment.id)).where(
             Appointment.appointment_date == today,
             Appointment.status == AppointmentStatus.COMPLETED
+        ))).scalar() or 0
+        cancelled_today = (await db.execute(select(func.count(Appointment.id)).where(
+            Appointment.appointment_date == today,
+            Appointment.status == AppointmentStatus.CANCELLED
         ))).scalar() or 0
         
         return ReceptionDashboardStats(
             todays_appointments=todays_appointments,
             upcoming_7_days=upcoming_7_days,
             total_patients=total_patients,
-            completed_today=completed_today
+            completed_today=completed_today,
+            status_summary=AppointmentStatusSummary(
+                scheduled=scheduled_today,
+                in_progress=in_progress_today,
+                completed=completed_today,
+                cancelled=cancelled_today
+            )
         )

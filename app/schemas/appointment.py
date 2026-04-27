@@ -75,6 +75,7 @@ class AdminDashboardStats(BaseModel) :
     total_doctors: int
     total_patients: int
     total_appointments: int   
+    status_summary: AppointmentStatusSummary
 
 # --- Reception stats schemas ---
 class ReceptionDashboardStats(BaseModel):
@@ -82,6 +83,7 @@ class ReceptionDashboardStats(BaseModel):
     upcoming_7_days: int
     total_patients: int
     completed_today: int
+    status_summary: AppointmentStatusSummary
     
 class AppointmentStatusUpdate(BaseModel):
     status: AppointmentStatus    
